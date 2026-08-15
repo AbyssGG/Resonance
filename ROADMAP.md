@@ -13,7 +13,7 @@
 - [ ] Add `nimble test`
 - [ ] Add a minimal smoke test
 - [ ] Document OpenVINO Runtime installation
-- [ ] Finalize the license and versioning policy
+- [x] Finalize the Apache-2.0 license and establish the initial v0.1.0 release policy
 
 ## v0.3 - API Expansion
 
