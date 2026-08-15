@@ -2,7 +2,7 @@
 
 Resonance is a Nim wrapper and binding library for the OpenVINO C API.
 
-It extracts the reusable inference foundation from `NimVoice` and turns it into a standalone library focused on:
+It is a standalone library focused on:
 
 - low-level OpenVINO C API bindings
 - safe Nim ownership wrappers
@@ -151,8 +151,8 @@ This project is licensed under the [Apache License 2.0](./LICENSE).
 - [ARCHITECTURE.zh-CN.md](./ARCHITECTURE.zh-CN.md)
 - [ROADMAP.md](./ROADMAP.md)
 - [ROADMAP.zh-CN.md](./ROADMAP.zh-CN.md)
-- [MIGRATION_FROM_NIMVOICE.md](./MIGRATION_FROM_NIMVOICE.md)
-- [MIGRATION_FROM_NIMVOICE.zh-CN.md](./MIGRATION_FROM_NIMVOICE.zh-CN.md)
+- [LIBRARY_BOUNDARIES.md](./LIBRARY_BOUNDARIES.md)
+- [LIBRARY_BOUNDARIES.zh-CN.md](./LIBRARY_BOUNDARIES.zh-CN.md)
 - [CHANGELOG.md](./CHANGELOG.md)
 - [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md)
 - [LANGUAGE.md](./LANGUAGE.md)
