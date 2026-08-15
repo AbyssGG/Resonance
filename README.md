@@ -1,30 +1,52 @@
 # Resonance
 
-**Resonance: A Nim OpenVINO C API Wrapper / Binding Library**
+Resonance is a Nim wrapper and binding library for the OpenVINO C API.
 
-`Resonance` is the extracted OpenVINO integration layer from `NimVoice`. Its goal is to turn this stack into a standalone, reusable, open-source Nim wrapper / binding library:
+It extracts the reusable inference foundation from `NimVoice` and turns it into a standalone library focused on:
 
-```text
-Nim
-  ↓
-OpenVINO C API
-  ↓
-Intel NPU
-```
+- low-level OpenVINO C API bindings
+- safe Nim ownership wrappers
+- tensor and infer request helpers
+- compiled-model import/export
+- Intel NPU-oriented runtime helpers
+- Windows x64 variadic ABI compatibility for profiling properties
 
-This repository focuses on OpenVINO C API bindings, handle ownership, model compilation, tensor management, profiling, and Intel NPU-oriented runtime helpers. It is a library layer, not a synthesizer product.
+Resonance is a library, not an end-user application. It does not ship TTS pipelines, GUI code, or model-specific business logic.
 
 ## Why Resonance
 
-- Pure Nim bindings with no Python runtime dependency
-- Preserves `.blob` compiled-model caching required for efficient Intel NPU workflows
-- Wraps `Core / Model / CompiledModel / InferRequest / Tensor`
-- Uses Nim `=destroy` destructors to manage OpenVINO C handles safely
-- Includes a Windows x64 variadic ABI compatibility layer for properties such as `PERF_COUNT`
+- Pure Nim runtime integration with `openvino_c.dll`
+- No Python runtime dependency
+- Thin enough to stay close to OpenVINO
+- High-level enough to avoid raw pointer ownership bugs
+- Designed around real Intel NPU deployment constraints
 
-## Current Scope
+## Layering
 
-The current extracted surface area includes:
+```text
+Nim App
+  -> resonance/core
+  -> resonance/model
+  -> resonance/compiled_model
+  -> resonance/infer_request
+  -> resonance/tensor
+  -> resonance/c_api
+  -> openvino_c.dll
+```
+
+## Current API Surface
+
+### Low-level
+
+- `OvStatus`
+- `OvElementType`
+- `OvShape`
+- `OvProfilingInfo`
+- `ov_*` C function imports
+- `nv_compile_model_with_perf_count`
+- `nv_enable_perf_count`
+
+### Safe wrappers
 
 - `newCore()`
 - `getAvailableDevices()`
@@ -34,11 +56,25 @@ The current extracted surface area includes:
 - `importModel()`
 - `compileOrImportModel()`
 - `createInferRequest()`
-- `setInputTensor() / getOutputTensor() / infer()`
+- `setInputTensor()`
+- `getOutputTensor()`
+- `infer()`
 - `getProfilingInfo()`
-- `newTensor() / setShape() / getShape() / getSize()`
+- `newTensor()`
+- `setShape()`
+- `getShape()`
+- `getData()`
+- `getSize()`
 
-## Project Layout
+## Design Principles
+
+1. Stay close to the OpenVINO C API.
+2. Make ownership explicit and automatic with Nim destructors.
+3. Treat compiled-model blob caching as core infrastructure.
+4. Keep Intel NPU workflows first-class.
+5. Separate reusable inference plumbing from application logic.
+
+## Repository Structure
 
 ```text
 src/
@@ -59,15 +95,15 @@ examples/
 
 ## Quick Start
 
-1. Prepare the OpenVINO Runtime and ensure `openvino_c.dll` is available on the system search path.
-2. Install Nim 2.x.
-3. Run from the repository root:
+1. Install Nim 2.x.
+2. Prepare the OpenVINO Runtime and ensure `openvino_c.dll` is available at runtime.
+3. Build and run the example from the repository root:
 
 ```bash
 nimble demo
 ```
 
-Or import it directly in your project:
+Minimal usage:
 
 ```nim
 import resonance
@@ -76,20 +112,26 @@ let core = newCore()
 echo core.getAvailableDevices()
 ```
 
-## Design Notes
+The bundled example also demonstrates `compileOrImportModel()`, which is the recommended path when you want predictable NPU cold-start behavior with `.blob` cache reuse.
 
-- This library targets the OpenVINO C API rather than the C++ API in order to keep ABI boundaries simple and deployment predictable.
-- `perf_count_wrapper.c` is a critical Windows x64 compatibility shim used to call OpenVINO's variadic property APIs safely.
-- `.blob` import and export support is treated as core infrastructure for Intel NPU cold-start optimization, not as an optional add-on.
+## Scope Boundaries
 
-## Open Source Checklist
+Resonance should contain:
 
-Recommended items before publishing:
+- OpenVINO bindings
+- safe wrappers
+- error handling
+- profiling helpers
+- blob cache helpers
+- reusable examples
 
-- Finalize the license
-- Add CI at least for `nim check` and example builds
-- Add one real inference example and a minimal test-model guide
-- Continue separating higher-level TTS-specific logic from this library
+Resonance should not contain:
+
+- TTS pipeline logic
+- tokenizer logic
+- model-specific post-processing
+- GUI code
+- application CLI behavior
 
 ## Community
 
@@ -104,8 +146,6 @@ This project is licensed under the [Apache License 2.0](./LICENSE).
 
 ## Related Docs
 
-- [LANGUAGE.md](./LANGUAGE.md)
-- [LANGUAGE.zh-CN.md](./LANGUAGE.zh-CN.md)
 - [README.zh-CN.md](./README.zh-CN.md)
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
 - [ARCHITECTURE.zh-CN.md](./ARCHITECTURE.zh-CN.md)
@@ -115,3 +155,5 @@ This project is licensed under the [Apache License 2.0](./LICENSE).
 - [MIGRATION_FROM_NIMVOICE.zh-CN.md](./MIGRATION_FROM_NIMVOICE.zh-CN.md)
 - [CHANGELOG.md](./CHANGELOG.md)
 - [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md)
+- [LANGUAGE.md](./LANGUAGE.md)
+- [LANGUAGE.zh-CN.md](./LANGUAGE.zh-CN.md)
