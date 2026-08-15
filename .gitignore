@@ -1,0 +1,9 @@
+nimcache/
+.nimcache/
+build/
+dist/
+*.exe
+*.dll
+*.obj
+*.o
+*.pdb
