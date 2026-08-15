@@ -140,6 +140,16 @@ Resonance should not contain:
 - [SECURITY.md](./SECURITY.md)
 - [SUPPORT.md](./SUPPORT.md)
 
+## AI-Assisted Development
+
+This project was developed with the assistance of Google Gemini 3.1 Pro.
+
+AI was used as a development assistant for tasks such as code generation, debugging, documentation, API exploration, and development workflow support.
+
+The project architecture, technical direction, integration decisions, testing, hardware validation, and final code review were performed by the project author.
+
+AI assistance does not change the project's core technical implementation or its open-source licensing.
+
 ## License
 
 This project is licensed under the [Apache License 2.0](./LICENSE).
