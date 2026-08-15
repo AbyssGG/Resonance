@@ -1,13 +1,22 @@
 # 更新日志
 
-这是 `CHANGELOG.md` 的中文占位页。
+## 0.1.0 - 首个独立发布版本
 
-## 状态
+### 新增
 
-- 英文版 `CHANGELOG.md` 是当前主版本
-- 本文件用于中文切换入口
-- 版本变更记录以英文版为准
+- 建立 Resonance 的首个独立 OpenVINO C API 封装基线
+- 建立核心包装对象：`Core`、`Model`、`CompiledModel`、`InferRequest`、`Tensor`
+- 增加 `compileOrImportModel()`，统一处理 `.blob` 冷启动和热启动路径
+- 增加 `getProfilingInfo()` 以及对应的 profiling 数据结构
+- 增加 `examples/basic_infer.nim` 最小示例程序
+- 增加首套可独立开源使用的文档体系
 
-## 对应英文文档
+### 保留
 
-- [CHANGELOG.md](./CHANGELOG.md)
+- `.blob` 编译模型导入导出能力
+- `PERF_COUNT` profiling 支持
+- Windows x64 variadic ABI 兼容包装层 `perf_count_wrapper.c`
+
+### 备注
+
+- 这个版本标志着 Resonance 已作为独立的 Nim + OpenVINO 基础设施库正式发布。
