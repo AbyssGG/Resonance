@@ -96,11 +96,11 @@ examples/
 ## Quick Start
 
 1. Install Nim 2.x.
-2. Prepare the OpenVINO Runtime and ensure `openvino_c.dll` is available at runtime.
-3. Build and run the example from the repository root:
+2. Install OpenVINO Runtime and make its C library discoverable (`openvino_c.dll` on Windows, `libopenvino_c.so` on Linux, or `libopenvino_c.dylib` on macOS). If the distribution only provides a versioned library, provide the corresponding unversioned development-library link.
+3. Build and run the example from the repository root with an OpenVINO IR model and a device:
 
 ```bash
-nimble demo
+nim c -r --path:src examples/basic_infer.nim model.xml CPU cache/model.blob
 ```
 
 Minimal usage:
@@ -112,7 +112,11 @@ let core = newCore()
 echo core.getAvailableDevices()
 ```
 
+Run `nimble test` with the runtime and CPU plugin available to execute the CPU smoke test. The C bindings target the OpenVINO 2026.4 headers; this release has been tested with 2026.4.1 on Linux. Other versions and platforms require validation.
+
 The bundled example also demonstrates `compileOrImportModel()`, which is the recommended path when you want predictable NPU cold-start behavior with `.blob` cache reuse.
+
+A blob cache path must be unique to the model, device, OpenVINO runtime and compile options, including profiling. Existing blobs are imported as-is; changing these inputs requires a new cache path or removing the old blob. `newTensor` wraps caller-owned memory: keep its buffer alive and unchanged in size until the tensor and any inference using it are finished.
 
 ## Scope Boundaries
 

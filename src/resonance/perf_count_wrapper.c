@@ -1,58 +1,55 @@
-/*
- * Thin wrappers around OpenVINO's variadic compile_model / set_property APIs.
- *
- * OpenVINO's C entry points accept property pairs through `...`. On Windows
- * x64 the OpenVINO DLL is built with MSVC, while Nim projects are commonly
- * built with MinGW/TDM-GCC. Variadic calls crossing those ABIs are fragile.
- *
- * We resolve the original symbols with GetProcAddress and expose stable,
- * non-variadic cdecl wrappers that Nim can call safely.
- */
-
+/* Resolve variadic OpenVINO entry points using the platform's native ABI. */
 #include <stddef.h>
+
+#if defined(_WIN32)
+#include <windows.h>
+#define NV_LIBRARY "openvino_c.dll"
+#define NV_OPEN() LoadLibraryA(NV_LIBRARY)
+#define NV_SYMBOL(h, n) GetProcAddress((HMODULE)(h), (n))
+#define NV_CLOSE(h) FreeLibrary((HMODULE)(h))
+#if defined(__GNUC__) && defined(__x86_64__)
+#define NV_ABI __attribute__((ms_abi))
+#else
+#define NV_ABI
+#endif
+#else
+#include <dlfcn.h>
+#if defined(__APPLE__)
+#define NV_LIBRARY "libopenvino_c.dylib"
+#else
+#define NV_LIBRARY "libopenvino_c.so"
+#endif
+#define NV_OPEN() dlopen(NV_LIBRARY, RTLD_LAZY | RTLD_LOCAL)
+#define NV_SYMBOL(h, n) dlsym((h), (n))
+#define NV_CLOSE(h) dlclose(h)
+#define NV_ABI
+#endif
 
 typedef struct ov_core ov_core_t;
 typedef struct ov_model ov_model_t;
 typedef struct ov_compiled_model ov_compiled_model_t;
 typedef int ov_status_e;
+typedef ov_status_e (NV_ABI *nv_compile_model_fn)(
+    const ov_core_t*, const ov_model_t*, const char*, size_t, ov_compiled_model_t**, ...);
+typedef ov_status_e (NV_ABI *nv_set_property_fn)(const ov_compiled_model_t*, ...);
 
-typedef __attribute__((ms_abi)) ov_status_e (*nv_compile_model_fn)(
-    const ov_core_t*, const ov_model_t*, const char*, size_t, ...);
-typedef __attribute__((ms_abi)) ov_status_e (*nv_set_property_fn)(
-    ov_compiled_model_t*, ...);
-
-static nv_compile_model_fn g_compile_model = NULL;
-static nv_set_property_fn g_set_property = NULL;
-static int g_resolved = 0;
-
-typedef struct HINSTANCE__* HINSTANCE;
-__declspec(dllimport) HINSTANCE __stdcall LoadLibraryA(const char*);
-__declspec(dllimport) void* __stdcall GetProcAddress(HINSTANCE, const char*);
-
-static int nv_resolve_symbols(void)
+ov_status_e nv_compile_model_with_perf_count(const ov_core_t* core,
+    const ov_model_t* model, const char* device_name, ov_compiled_model_t** compiled_model)
 {
-    if (g_resolved) return 1;
-    HINSTANCE mod = LoadLibraryA("openvino_c.dll");
-    if (!mod) return 0;
-    g_compile_model = (nv_compile_model_fn)GetProcAddress(mod, "ov_core_compile_model");
-    g_set_property = (nv_set_property_fn)GetProcAddress(mod, "ov_compiled_model_set_property");
-    g_resolved = (g_compile_model != NULL && g_set_property != NULL);
-    return g_resolved;
+    void* lib = (void*)NV_OPEN();
+    if (!lib) return -1;
+    nv_compile_model_fn fn = (nv_compile_model_fn)NV_SYMBOL(lib, "ov_core_compile_model");
+    ov_status_e status = fn ? fn(core, model, device_name, 2, compiled_model, "PERF_COUNT", "YES") : -1;
+    NV_CLOSE(lib);
+    return status;
 }
 
-__declspec(dllexport) ov_status_e __cdecl nv_compile_model_with_perf_count(
-    const ov_core_t* core,
-    const ov_model_t* model,
-    const char* device_name,
-    ov_compiled_model_t** compiled_model)
+ov_status_e nv_enable_perf_count(ov_compiled_model_t* compiled_model)
 {
-    if (!nv_resolve_symbols() || g_compile_model == NULL) return -1;
-    return g_compile_model(core, model, device_name, 2, compiled_model, "PERF_COUNT", "YES");
-}
-
-__declspec(dllexport) ov_status_e __cdecl nv_enable_perf_count(
-    ov_compiled_model_t* compiled_model)
-{
-    if (!nv_resolve_symbols() || g_set_property == NULL) return -1;
-    return g_set_property(compiled_model, "PERF_COUNT", "YES");
+    void* lib = (void*)NV_OPEN();
+    if (!lib) return -1;
+    nv_set_property_fn fn = (nv_set_property_fn)NV_SYMBOL(lib, "ov_compiled_model_set_property");
+    ov_status_e status = fn ? fn(compiled_model, "PERF_COUNT", "YES") : -1;
+    NV_CLOSE(lib);
+    return status;
 }

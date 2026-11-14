@@ -112,12 +112,6 @@ proc compileOrImportModel*(
 ): tuple[compiledModel: CompiledModel, cacheHit: bool] =
   if blobCachePath.len > 0 and fileExists(blobCachePath):
     result.compiledModel = core.importModel(blobCachePath, deviceName)
-    if enableProfiling:
-      requireStatus(
-        nv_enable_perf_count(result.compiledModel.pCompiledModel),
-        "Re-enable PERF_COUNT after blob import",
-        blobCachePath
-      )
     result.cacheHit = true
     return
 

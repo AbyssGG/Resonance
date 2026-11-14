@@ -10,8 +10,8 @@
 
 ## v0.2 - Packaging
 
-- [ ] Add `nimble test`
-- [ ] Add a minimal smoke test
+- [x] Add `nimble test`
+- [x] Add a minimal smoke test
 - [ ] Document OpenVINO Runtime installation in more detail
 - [ ] Add a minimal model preparation guide for first-time users
 - [x] Finalize the Apache-2.0 license and establish the initial v0.1.0 release policy

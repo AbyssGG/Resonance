@@ -96,11 +96,11 @@ examples/
 ## 快速开始
 
 1. 安装 Nim 2.x。
-2. 准备 OpenVINO Runtime，并确保运行时可以找到 `openvino_c.dll`。
-3. 在仓库根目录执行：
+2. 安装 OpenVINO Runtime，并确保系统能找到 C 库（Windows 为 `openvino_c.dll`，Linux 为 `libopenvino_c.so`，macOS 为 `libopenvino_c.dylib`）。如果发行包只提供带版本号的库，需要提供对应的无版本开发库链接。
+3. 在仓库根目录使用 OpenVINO IR 模型和设备名称运行：
 
 ```bash
-nimble demo
+nim c -r --path:src examples/basic_infer.nim model.xml CPU cache/model.blob
 ```
 
 最小示例：
@@ -112,7 +112,11 @@ let core = newCore()
 echo core.getAvailableDevices()
 ```
 
+运行时和 CPU 插件可用时，可执行 `nimble test` 运行 CPU 冒烟测试。本次绑定以 OpenVINO 2026.4 头文件为准，已在 Linux + 2026.4.1 上验证；其他版本和平台仍需验证。
+
 仓库自带示例还演示了 `compileOrImportModel()` 的用法。这是做 Intel NPU 冷启动优化时更推荐的入口，因为它把 `.blob` 缓存复用纳入了默认工作流。
+
+缓存路径必须对应唯一的模型、设备、OpenVINO 运行时和编译选项（包括 profiling）。已有 blob 会直接导入；上述条件变化时应更换缓存路径或删除旧 blob。`newTensor` 使用调用方持有的内存，必须保证缓冲区在 tensor 和相关推理使用期间保持有效且大小不变。
 
 ## 范围边界
 

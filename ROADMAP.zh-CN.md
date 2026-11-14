@@ -10,8 +10,8 @@
 
 ## v0.2 - 打包完善
 
-- [ ] 增加 `nimble test`
-- [ ] 增加最小 smoke test
+- [x] 增加 `nimble test`
+- [x] 增加最小 smoke test
 - [ ] 更完整地说明 OpenVINO Runtime 安装方式
 - [ ] 为首次接触项目的用户补一份最小模型准备指南
 - [x] 完成 Apache-2.0 许可证和初始 v0.1.0 发布策略

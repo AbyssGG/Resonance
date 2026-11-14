@@ -1,6 +1,8 @@
 ## Low-level OpenVINO C API bindings for Nim.
 
 {.compile: "perf_count_wrapper.c".}
+when defined(linux):
+  {.passL: "-ldl".}
 
 type
   OvStatus* = enum
@@ -18,6 +20,10 @@ type
     INFER_NOT_STARTED = -11
     NETWORK_NOT_READ = -12
     INFER_CANCELLED = -13
+    INVALID_C_PARAM = -14
+    UNKNOWN_C_ERROR = -15
+    NOT_IMPLEMENT_C_METHOD = -16
+    UNKNOW_EXCEPTION = -17
 
   OvElementType* = enum
     DYNAMIC = 0
@@ -32,11 +38,20 @@ type
     I32 = 9
     I64 = 10
     U1 = 11
-    U4 = 12
-    U8 = 13
-    U16 = 14
-    U32 = 15
-    U64 = 16
+    U2 = 12
+    U3 = 13
+    U4 = 14
+    U6 = 15
+    U8 = 16
+    U16 = 17
+    U32 = 18
+    U64 = 19
+    NF4 = 20
+    F8E4M3 = 21
+    F8E5M3 = 22
+    STRING = 23
+    F4E2M1 = 24
+    F8E8M0 = 25
 
   OvAvailableDevices* = object
     devices*: cstringArray
@@ -69,7 +84,12 @@ type
     profilingInfos*: ptr UncheckedArray[OvProfilingInfo]
     size*: csize_t
 
-const dllName* = "openvino_c.dll"
+when defined(windows):
+  const dllName* = "openvino_c.dll"
+elif defined(macosx):
+  const dllName* = "libopenvino_c.dylib"
+else:
+  const dllName* = "libopenvino_c.so"
 const OvPropertyKeyEnableProfiling* = "PERF_COUNT"
 
 proc ov_core_create*(core: ptr ptr OvCore): OvStatus {.cdecl, dynlib: dllName, importc: "ov_core_create".}

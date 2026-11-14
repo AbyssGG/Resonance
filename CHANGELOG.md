@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1
+
+- Fix Linux builds and resolve the C runtime with platform-specific library names.
+- Preserve profiling settings when importing compiled model caches instead of setting a property after compilation.
+- Align element types and error codes with OpenVINO 2026.4 and add a CPU inference and cache smoke test.
+- Document cache compatibility and caller-owned tensor memory.
+
 ## 0.1.0 - Initial Standalone Release
 
 ### Added
